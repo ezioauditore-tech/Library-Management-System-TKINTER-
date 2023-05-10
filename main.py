@@ -21,6 +21,7 @@ class BcuLibSystem:
     def login(self):
         login_window = Toplevel(self.master)
         login_window.title("Login")
+        login_window.geometry("500x400")
 
         uid_label = Label(login_window, text="User ID")
         uid_label.pack()
@@ -47,9 +48,11 @@ class BcuLibSystem:
             messagebox.showinfo("Login Successful", f"Welcome {result['Name']}")
             if result['Role'] == 'staff' or result['Role'] == 'student':
                 m = Memebr(result['Id'])
+                root.destroy()
                 m.run()
             if result['Role'] == 'lib':
                 m = Librarian(result['Id'])
+                root.destroy()
                 m.run()
         else:
             messagebox.showerror("Login Failed", "Invalid User ID or Password")
@@ -57,6 +60,7 @@ class BcuLibSystem:
     def register(self):
         register_window = Toplevel(self.master)
         register_window.title("Register")
+        register_window.geometry("500x400")
 
         u_name_label = Label(register_window, text="Username")
         u_name_label.pack()

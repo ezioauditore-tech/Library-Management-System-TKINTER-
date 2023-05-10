@@ -1,7 +1,7 @@
 from tkinter import *
 from book import Book
 from libData import LibData
-
+from tkinter import messagebox
 
 class Memebr:
 
@@ -66,8 +66,25 @@ class Memebr:
         LibData.calculateFine(userId, bookId)
 
     def searchBook(self):
+        search = Toplevel(self.window)
+        search.title("search results")
+        search.geometry("500x400")
+        scrollbar = Scrollbar(search)
+        scrollbar.pack(side="right", fill="y")
+        search_results_listbox = Listbox(search, width=500, height=400, yscrollcommand=scrollbar.set)
+        search_results_listbox.pack()
+        scrollbar.config(command=search_results_listbox.yview)
         data = self.search_entry.get()
-        LibData.searchBook(data)
+        result = LibData.searchBook(data)
+        search_results_listbox.delete(0, "end")
+        book_list = "ISBN - Title - Authors\n"
+        i = 1
+        for book in result:
+            book_list= f"{i} - {book[2]} - {book[0]} - {book[1]}"
+            i += 1
+            search_results_listbox.insert("end", book_list)
+
+        search.mainloop()
 
     def getBorrowedBook(self):
         import sqlite3
@@ -83,13 +100,22 @@ class Memebr:
         print(books)
 
         if not books:
-            print('You have not borrowed any book yet!')
-            print('')
+            messagebox.showinfo('Borrowed Books','You have not borrowed any book yet!')
         else:
-            print('')
-            print('*********************')
-            print('* List Of Borowed Book*')
-            print('*********************')
+            borrow=Toplevel(self.window)
+            borrow.title("Borrowed Books")
+            borrow.geometry("500x400")
+            scrollbar = Scrollbar(borrow)
+            scrollbar.pack(side="right", fill="y")
+            borrow_listbox = Listbox(borrow, width=500, height=400, yscrollcommand=scrollbar.set)
+            borrow_listbox.pack()
+            scrollbar.config(command=borrow_listbox.yview)
+            i = 1
+            for book in books:
+                book = f"{i} - {book[0]} - {book[1]}"
+                borrow_listbox.insert("end", book)
+
+            borrow.mainloop()
             for book in books:
                 print(f"{book[0]} - {book[1]}")
             print('')

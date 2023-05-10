@@ -1,5 +1,7 @@
 from book import Book
 import datetime
+import tkinter as tk
+from tkinter import messagebox
 
 
 class LibData:
@@ -19,11 +21,10 @@ class LibData:
                       """, {'uid': userId, 'bid': bookId, 'bdate': today, 'status': 'borrowed'})
             conn.commit()
             conn.close()
-            Book.updateAvailibility(ava-1, bookId)
-            print('Book is borrowed by you')
-
+            Book.updateAvailibility(ava - 1, bookId)
+            messagebox.showinfo('Borrow Book', 'Book is borrowed by you')
         else:
-            print('The book is not available')
+            messagebox.showinfo('Borrow Book', 'The book is not available')
 
     @staticmethod
     def reserveBook(userId, bookId):
@@ -38,8 +39,9 @@ class LibData:
                     """, {'uid': userId, 'bid': bookId, 'bdate': today, 'status': 'reserved'})
         conn.commit()
         conn.close()
-        print('Book has been reserved successfully')
+        messagebox.showinfo('Reserve Book', 'Book has been reserved successfully')
 
+    @staticmethod
     def returnBook(bookId):
         import sqlite3
         conn = sqlite3.connect("mydb.db")
@@ -52,30 +54,30 @@ class LibData:
             {"return_date": today, "bookId": bookId})
         conn.commit()
         conn.close()
-        Book.updateAvailibility(ava-1, bookId)
-        print('Book returned successfully')
+        Book.updateAvailibility(ava - 1, bookId)
+        messagebox.showinfo('Return Book', 'Book returned successfully')
 
     @staticmethod
     def searchBook(data):
-
         import sqlite3
         conn = sqlite3.connect("mydb.db")
         c = conn.cursor()
-        data = '%'+data+'%'
+        data = '%' + data + '%'
         c.execute(""" 
-                  select title,authors,isbn from book
+                  select title, authors, isbn from book
                   where title like :d
                   or authors like :d
-                  or ISBN like :d                  
+                  or isbn like :d                  
                   """, {'d': data})
         result = c.fetchall()
-        print('ISBN - Title - Authors')
+        book_list = "ISBN - Title - Authors\n"
         i = 1
         for book in result:
-            print(f"{i} - {book[2]} - {book[0]} - {book[1]}")
-            i = i + 1
+            book_list += f"{i} - {book[2]} - {book[0]} - {book[1]}\n"
+            i += 1
         conn.commit()
         conn.close()
+        return result
 
     @staticmethod
     def calculateFine(userId, bookId):
@@ -83,10 +85,9 @@ class LibData:
         conn = sqlite3.connect("mydb.db")
         c = conn.cursor()
         c.execute(""" 
-                  select borrowDate,returnDate from borrow
+                  select borrowDate, returnDate from borrow
                   where userId = :uid
                   and bookId = :bid
-               
                   """, {'uid': userId, 'bid': bookId})
         result = c.fetchone()
         borrowDate = result[0]
@@ -96,11 +97,15 @@ class LibData:
         delta = rDate - bDate
         delta = delta.days
         if delta <= 7:
-            print("You don't owe any fine")
+            messagebox.showinfo('Fine Calculation', "You don't owe any fine")
         else:
             fineDays = delta - 7
-            print(f"""You returned the book after {delta} days.
-The fine for everyday delay more than 7 days is 2 pound.
-You have to pay {fineDays*2} pounds.""")
+            messagebox.showinfo(
+                'Fine Calculation',
+                f"You returned the book after {delta} days.\n"
+                f"The fine for everyday delay more than 7 days is 2 pound.\n"
+                f"You have to pay {fineDays*2} pounds."
+            )
         conn.commit()
         conn.close()
+
