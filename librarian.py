@@ -1,27 +1,52 @@
 from book import Book
 from libData import LibData
-import tkinter as tk
+from tkinter import *
 from tkinter import messagebox
-
 
 class Librarian:
 
     def __init__(self, Id):
         self.Id = Id
-        self.window = tk()
-        self.window.title("Library Management System - Member")
+        self.window = Tk()
+        self.window.title("Library Management System - Librarian")
         self.window.geometry("500x400")
 
+        # create input fields and labels
+        self.isbn_label = Label(self.window, text="ISBN:")
+        self.isbn_label.pack()
+        self.isbn_entry = Entry(self.window)
+        self.isbn_entry.pack()
+        self.title_label = Label(self.window, text="Title:")
+        self.title_label.pack()
+        self.title_entry = Entry(self.window)
+        self.title_entry.pack()
+        self.author_label = Label(self.window, text="Author:")
+        self.author_label.pack()
+        self.author_entry = Entry(self.window)
+        self.author_entry.pack()
+
+        # create buttons
+        self.update_button = Button(self.window, text="Update", command=self.updateBook)
+        self.update_button.pack()
+
+        self.borrow_button = Button(self.window, text="Borrowed Books", command=self.viewBorrowedBooks)
+        self.borrow_button.pack()
+
+        self.search_label = Label(self.window, text="Search:")
+        self.search_label.pack()
+        self.search_entry = Entry(self.window)
+        self.search_entry.pack()
+
+        self.search_button = Button(self.window, text="Search", command=self.searchBook)
+        self.search_button.pack()
+
     def updateBook(self):
-        isbn = self.inputBox('Please enter isbn of book that you want to update:')
+        isbn = self.isbn_entry.get()
         bookId = Book.getBookIdByIsbn(isbn)
-        if bookId is None:
-            self.messageBox('Error', 'Book with the provided ISBN not found.')
-            return
-        title = self.inputBox('Please enter the new title:')
-        authors = self.inputBox('Please enter the new authors:')
+        title = self.title_entry.get()
+        authors = self.author_entry.get()
         Book.updateBook(bookId, title, authors)
-        self.messageBox('Success', 'Book details updated successfully.')
+        messagebox.showinfo('update','Updated Successfully!')
 
     def viewBorrowedBooks(self):
         import sqlite3
@@ -34,54 +59,80 @@ class Librarian:
                   """, {'uId': self.Id, 'status': 'borrowed'})
 
         books = c.fetchall()
+        print(books)
+
         if not books:
-            self.messageBox('No borrowed books', 'No borrowed books found.')
+            messagebox.showinfo('Borrowed Books','No borrowed Books!')
         else:
-            book_list = "\n".join([f"{book[0]} - {book[1]}" for book in books])
-            self.messageBox('List of Borrowed Books', book_list)
+            borrow=Toplevel(self.window)
+            borrow.title("Borrowed Books")
+            borrow.geometry("500x400")
+            scrollbar = Scrollbar(borrow)
+            scrollbar.pack(side="right", fill="y")
+            borrow_listbox = Listbox(borrow, width=500, height=400, yscrollcommand=scrollbar.set)
+            borrow_listbox.pack()
+            scrollbar.config(command=borrow_listbox.yview)
+            i = 1
+            for book in books:
+                book = f"{i} - {book[0]} - {book[1]}"
+                i+=1
+                borrow_listbox.insert("end", book)
+
+            borrow.mainloop()
+            for book in books:
+                print(f"{book[0]} - {book[1]}")
+            print('')
 
         conn.commit()
         conn.close()
 
     def searchBook(self):
-        data = self.inputBox('Please enter search data:')
-        search_results = LibData.searchBook(data)
-        if not search_results:
-            self.messageBox('Search Results', 'No books found matching the search criteria.')
-        else:
-            book_list = "\n".join([f"{book['isbn']} - {book['title']}" for book in search_results])
-            self.messageBox('Search Results', book_list)
+        search = Toplevel(self.window)
+        search.title("search results")
+        search.geometry("500x400")
+        scrollbar = Scrollbar(search)
+        scrollbar.pack(side="right", fill="y")
+        search_results_listbox = Listbox(search, width=500, height=400, yscrollcommand=scrollbar.set)
+        search_results_listbox.pack()
+        scrollbar.config(command=search_results_listbox.yview)
+        data = self.search_entry.get()
+        result = LibData.searchBook(data)
+        search_results_listbox.delete(0, "end")
+        book_list = "ISBN - Title - Authors\n"
+        i = 1
+        for book in result:
+            book_list= f"{i} - {book[2]} - {book[0]} - {book[1]}"
+            i += 1
+            search_results_listbox.insert("end", book_list)
+
+        search.mainloop()
 
     def getBorrowedBookforUser(self):
         pass
 
     def menu(self):
-        root = tk.Tk()
-        root.geometry('400x300')
-        root.title('Library Management System')
-        
-        title_label = tk.Label(root, text='Welcome Librarian', font=('Arial', 16))
-        title_label.pack(pady=10)
-        
-        update_button = tk.Button(root, text='Update Books', command=self.updateBook)
-        update_button.pack(pady=5)
+        while True:
+            print("""
+                  1. update books
+                  2. view all borrowed books report
+                  3. search for book
+                  q. quit
+                  """)
+            choice = input("select your choice: ")
+            f = {
+                "1": self.updateBook,
+                "2": self.viewBorrowedBooks,
+                "3": self.searchBook,
+                "q": 'q'}.get(choice, None)
+            if f == 'q':
+                break
+            if f == None:
+                print("Error, Try Again..")
 
-        view_borrowed_button = tk.Button(root, text='View All Borrowed Books', command=self.viewBorrowedBooks)
-        view_borrowed_button.pack(pady=5)
-
-        search_button = tk.Button(root, text='Search Books', command=self.searchBook)
-        search_button.pack(pady=5)
-
-        quit_button = tk.Button(root, text='Quit', command=root.destroy)
-        quit_button.pack(pady=5)
-
-        root.mainloop()
-
-    def inputBox(self, message):
-        return messagebox.askquestion('Input', message)
-
-    def messageBox(self, title, message):
-        messagebox.showinfo(title, message)
+            else:
+                f()
 
     def foo(self):
         pass
+    def run(self):
+        self.window.mainloop()

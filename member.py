@@ -113,6 +113,7 @@ class Memebr:
             i = 1
             for book in books:
                 book = f"{i} - {book[0]} - {book[1]}"
+                i+=1
                 borrow_listbox.insert("end", book)
 
             borrow.mainloop()

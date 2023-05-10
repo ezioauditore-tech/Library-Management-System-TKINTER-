@@ -67,7 +67,9 @@ class LibData:
                   select title, authors, isbn from book
                   where title like :d
                   or authors like :d
-                  or isbn like :d                  
+                  or isbn like :d  
+                  or language like :d
+                  or publication like :d                
                   """, {'d': data})
         result = c.fetchall()
         book_list = "ISBN - Title - Authors\n"
