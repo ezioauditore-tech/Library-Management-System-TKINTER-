@@ -8,6 +8,7 @@ class BcuLibSystem:
     def __init__(self, master):
         self.master = master
         master.title("BCU Lib System")
+        master.geometry("500x400")
 
         self.welcome_label = Label(master, text="Welcome to BCU Lib System")
         self.welcome_label.pack()
