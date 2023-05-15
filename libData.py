@@ -80,7 +80,22 @@ class LibData:
         conn.commit()
         conn.close()
         return result
-
+    @staticmethod
+    def unreserveBook(userId, bookId):
+        import sqlite3
+        conn = sqlite3.connect("mydb.db")
+        c = conn.cursor()
+        
+        # Delete the reservation from the database based on the user ID and book ID
+        c.execute("""
+            DELETE FROM reserve
+            WHERE userId = :userId
+            AND bookId = :bookId
+        """, {'userId': userId, 'bookId': bookId})
+        
+        conn.commit()
+        conn.close()
+        messagebox.showinfo('Unreserve Book', 'Book has been unreserved successfully')
     @staticmethod
     def calculateFine(userId, bookId):
         import sqlite3

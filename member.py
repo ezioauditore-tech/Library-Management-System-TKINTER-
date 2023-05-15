@@ -28,6 +28,8 @@ class Memebr:
 
         self.return_button = Button(self.window, text="Return", command=self.return_book)
         self.return_button.pack()
+        self.unreserve_button = Button(self.window, text="Unreserve", command=self.unreserve_book)
+        self.unreserve_button.pack()
 
         self.fine_button = Button(self.window, text="Calculate Fine", command=self.fine)
         self.fine_button.pack()
@@ -42,6 +44,8 @@ class Memebr:
 
         self.borrowed_button = Button(self.window, text="List of Borrowed Books", command=self.getBorrowedBook)
         self.borrowed_button.pack()
+        self.reserved_button = Button(self.window, text="List of Reserved Books", command=self.getreservedBook)
+        self.reserved_button.pack()
 
         self.quit_button = Button(self.window, text="Quit", command=self.window.destroy)
         self.quit_button.pack()
@@ -50,7 +54,10 @@ class Memebr:
         isbn = self.isbn_entry.get()
         bookId = Book.getBookIdByIsbn(isbn)
         LibData.borrowBook(self.Id, bookId)
-
+    def unreserve_book(self):
+        isbn = self.isbn_entry.get()
+        bookId = Book.getBookIdByIsbn(isbn)
+        LibData.unreserveBook(self.Id, bookId)
     def reserve(self):
         isbn = self.isbn_entry.get()
         bookId = Book.getBookIdByIsbn(isbn)
@@ -127,6 +134,45 @@ class Memebr:
 
         conn.commit()
         conn.close()
+    def getreservedBook(self):
+        import sqlite3
+        conn = sqlite3.connect("mydb.db")
+        c = conn.cursor()
+        c.execute("""
+              SELECT book.isbn, book.title, reserve.reserveDate
+              FROM book, reserve
+              WHERE reserve.bookId = book.Id
+              AND reserve.userId = :uId
+              AND reserve.status = :status
+              """, {'uId': self.Id, 'status': 'reserved'})
+
+        books = c.fetchall()
+        print(books)
+
+        if not books:
+            messagebox.showinfo('reserved Books','You have not borrowed any book yet!')
+        else:
+            borrow=Toplevel(self.window)
+            borrow.title("reserved Books")
+            borrow.geometry("500x400")
+            scrollbar = Scrollbar(borrow)
+            scrollbar.pack(side="right", fill="y")
+            borrow_listbox = Listbox(borrow, width=500, height=400, yscrollcommand=scrollbar.set)
+            borrow_listbox.pack()
+            scrollbar.config(command=borrow_listbox.yview)
+            i = 1
+            for book in books:
+                book_info = f"{i} -- {book[0]} -- {book[1]} --{book[2]}"
+                i+=1
+                borrow_listbox.insert("end", book)
+
+            borrow.mainloop()
+            for book in books:
+                print(f"{book[0]} - {book[1]}")
+            print('')
+
+        conn.commit()
+        conn.close()    
 
     def run(self):
         self.window.mainloop()
