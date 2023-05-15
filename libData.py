@@ -11,7 +11,7 @@ class LibData:
         import sqlite3
         conn = sqlite3.connect("mydb.db")
         c = conn.cursor()
-        ava = Book.checkAvailbality(bookId)
+        ava = Book.checkAvailability(bookId)
         if ava > 0:
             today = datetime.date.today()
             today = today.strftime("%d/%m/%Y")
@@ -21,7 +21,7 @@ class LibData:
                       """, {'uid': userId, 'bid': bookId, 'bdate': today, 'status': 'borrowed'})
             conn.commit()
             conn.close()
-            Book.updateAvailibility(ava - 1, bookId)
+            Book.updateAvailability(ava - 1, bookId)
             messagebox.showinfo('Borrow Book', 'Book is borrowed by you')
         else:
             messagebox.showinfo('Borrow Book', 'The book is not available')
@@ -46,7 +46,7 @@ class LibData:
         import sqlite3
         conn = sqlite3.connect("mydb.db")
         c = conn.cursor()
-        ava = Book.checkAvailbality(bookId)
+        ava = Book.checkAvailability(bookId)
         today = datetime.date.today()
         today = today.strftime("%d/%m/%Y")
         c.execute(
@@ -54,7 +54,7 @@ class LibData:
             {"return_date": today, "bookId": bookId})
         conn.commit()
         conn.close()
-        Book.updateAvailibility(ava - 1, bookId)
+        Book.updateAvailability(ava - 1, bookId)
         messagebox.showinfo('Return Book', 'Book returned successfully')
 
     @staticmethod

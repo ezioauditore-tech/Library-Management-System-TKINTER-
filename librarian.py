@@ -28,9 +28,20 @@ class Librarian:
         # create buttons
         self.update_button = Button(self.window, text="Update", command=self.updateBook)
         self.update_button.pack()
+        # create buttons
+        self.add_button = Button(self.window, text="Add", command=self.addBook)
+        self.add_button.pack()
+
+        self.isbn_del = Label(self.window, text="Enter ISBN for Deleting:")
+        self.isbn_del.pack()
+        self.isbn_del_Entry = Entry(self.window)
+        self.isbn_del_Entry.pack()
+        self.delete_button = Button(self.window, text="Delete", command=self.deleteBook)
+        self.delete_button.pack()
 
         self.borrow_button = Button(self.window, text="Borrowed Books", command=self.viewBorrowedBooks)
         self.borrow_button.pack()
+
 
         self.search_label = Label(self.window, text="Search:")
         self.search_label.pack()
@@ -46,7 +57,19 @@ class Librarian:
         title = self.title_entry.get()
         authors = self.author_entry.get()
         Book.updateBook(bookId, title, authors)
-        messagebox.showinfo('update','Updated Successfully!')
+        messagebox.showinfo('Update', 'Book updated successfully!')
+
+    def deleteBook(self):
+        isbn = self.isbn_del_Entry.get()
+        bookId = Book.getBookIdByIsbn(isbn)
+        Book.deleteBook(bookId)
+        messagebox.showinfo('Delete', 'Book deleted successfully!')
+    def addBook(self):
+        isbn = self.isbn_entry.get()
+        title = self.title_entry.get()
+        authors = self.author_entry.get()
+        Book.addBook( title, authors,isbn)
+        messagebox.showinfo('Add','Added Successfully!')
 
     def viewBorrowedBooks(self):
         import sqlite3
