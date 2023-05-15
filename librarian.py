@@ -124,7 +124,7 @@ class Librarian:
         book_list = "ISBN - Title - Authors\n"
         i = 1
         for book in result:
-            book_list= f"{i} - {book[2]} - {book[0]} - {book[1]} - {book[3]}"
+            book_list= f"{i} - {book[2]} - {book[0]} - {book[1]}"
             i += 1
             search_results_listbox.insert("end", book_list)
 
