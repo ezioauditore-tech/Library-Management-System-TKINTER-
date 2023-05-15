@@ -76,7 +76,7 @@ class Librarian:
         conn = sqlite3.connect("mydb.db")
         c = conn.cursor()
         c.execute("""
-                  select book.isbn,book.title from book,borrow
+                  select book.isbn,book.title,borrow.borrowDate,borrow.userid from book,borrow
                   where borrow.bookId = book.Id
                   and borrow.status = :status
                   """, {'uId': self.Id, 'status': 'borrowed'})
@@ -97,13 +97,13 @@ class Librarian:
             scrollbar.config(command=borrow_listbox.yview)
             i = 1
             for book in books:
-                book = f"{i} - {book[0]} - {book[1]}"
+                book = f"{i} -- {book[0]} -- {book[1]} -- {book[2]}"
                 i+=1
                 borrow_listbox.insert("end", book)
 
             borrow.mainloop()
             for book in books:
-                print(f"{book[0]} - {book[1]}")
+                print(f"{book[0]} - {book[1]} - {book[2]}")
             print('')
 
         conn.commit()
@@ -124,7 +124,7 @@ class Librarian:
         book_list = "ISBN - Title - Authors\n"
         i = 1
         for book in result:
-            book_list= f"{i} - {book[2]} - {book[0]} - {book[1]}"
+            book_list= f"{i} - {book[2]} - {book[0]} - {book[1]} - {book[3]}"
             i += 1
             search_results_listbox.insert("end", book_list)
 

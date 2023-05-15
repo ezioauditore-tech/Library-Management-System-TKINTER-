@@ -2,6 +2,8 @@ from tkinter import *
 from book import Book
 from libData import LibData
 from tkinter import messagebox
+from datetime import datetime
+
 
 class Memebr:
 
@@ -91,10 +93,12 @@ class Memebr:
         conn = sqlite3.connect("mydb.db")
         c = conn.cursor()
         c.execute("""
-                  select book.isbn,book.title from book,borrow
-                  where borrow.bookId = book.Id
-                  and borrow.userId = :uId and borrow.status = :status
-                  """, {'uId': self.Id, 'status': 'borrowed'})
+              SELECT book.isbn, book.title, borrow.borrowDate
+              FROM book, borrow
+              WHERE borrow.bookId = book.Id
+              AND borrow.userId = :uId
+              AND borrow.status = :status
+              """, {'uId': self.Id, 'status': 'borrowed'})
 
         books = c.fetchall()
         print(books)
@@ -112,7 +116,7 @@ class Memebr:
             scrollbar.config(command=borrow_listbox.yview)
             i = 1
             for book in books:
-                book = f"{i} - {book[0]} - {book[1]}"
+                book_info = f"{i} -- {book[0]} -- {book[1]} --{book[2]}"
                 i+=1
                 borrow_listbox.insert("end", book)
 
